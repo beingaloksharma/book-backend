@@ -19,3 +19,9 @@ database:
   sslmode: disable
   timezone: UTC
   schema: bookapp
+
+# JWT Configuration
+jwt:
+  secret: supersecretkey
+  expiration: 24h
+

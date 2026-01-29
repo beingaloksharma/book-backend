@@ -15,6 +15,17 @@ func NewUserController() *UserController {
 	return &UserController{UserService: service.NewUserService()}
 }
 
+// GetProfile godoc
+// @Summary Get user profile
+// @Description Get profile of the logged-in user
+// @Tags User
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} model.User
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/profile [get]
 func (c *UserController) GetProfile(ctx *gin.Context) {
 	userID, _ := ctx.Get("user_id")
 
@@ -46,6 +57,18 @@ type AddressRequest struct {
 	Country string `json:"country" binding:"required"`
 }
 
+// AddAddress godoc
+// @Summary Add a new address
+// @Description Add a new address for the user
+// @Tags User
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body AddressRequest true "Address Request"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/addresses [post]
 func (c *UserController) AddAddress(ctx *gin.Context) {
 	userID, _ := ctx.Get("user_id")
 	var req AddressRequest
@@ -73,6 +96,16 @@ func (c *UserController) AddAddress(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Address added successfully"})
 }
 
+// GetAddresses godoc
+// @Summary List user addresses
+// @Description Get all addresses of the logged-in user
+// @Tags User
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} model.Address
+// @Failure 500 {object} map[string]string
+// @Router /api/addresses [get]
 func (c *UserController) GetAddresses(ctx *gin.Context) {
 	userID, _ := ctx.Get("user_id")
 

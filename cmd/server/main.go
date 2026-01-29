@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	_ "github.com/beingaloksharma/book-backend/docs"
 	"github.com/beingaloksharma/book-backend/internal/controller"
 	"github.com/beingaloksharma/book-backend/internal/middleware"
 	"github.com/beingaloksharma/book-backend/internal/model"
@@ -12,8 +13,29 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title Book Store API
+// @version 1.0
+// @description REST API for a Book Store application managing users, books, carts, and orders.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
+// @schemes http
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	// Logger - utilizing the custom wrapper
 	logger.GinLogger()
@@ -37,6 +59,9 @@ func main() {
 		auth.POST("/signup", authController.Signup)
 		auth.POST("/login", authController.Login)
 	}
+
+	// Swagger
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Book Routes
 	bookController := controller.NewBookController()

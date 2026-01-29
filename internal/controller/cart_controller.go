@@ -20,6 +20,18 @@ type AddToCartRequest struct {
 	Quantity int  `json:"quantity" binding:"required"`
 }
 
+// AddToCart godoc
+// @Summary Add item to cart
+// @Description Add a book to user's cart
+// @Tags Cart
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body AddToCartRequest true "Add To Cart Request"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/cart [post]
 func (c *CartController) AddToCart(ctx *gin.Context) {
 	userID, _ := ctx.Get("user_id")
 	var req AddToCartRequest
@@ -50,6 +62,17 @@ func (c *CartController) AddToCart(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Item added to cart"})
 }
 
+// GetCart godoc
+// @Summary Get user cart
+// @Description Get current user's cart
+// @Tags Cart
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} model.Cart
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/cart [get]
 func (c *CartController) GetCart(ctx *gin.Context) {
 	userID, _ := ctx.Get("user_id")
 
