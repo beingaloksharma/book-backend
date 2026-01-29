@@ -35,6 +35,7 @@ import (
 // @name Authorization
 func main() {
 	// Logger - utilizing the custom wrapper
+	logger.Init()
 	logger.GinLogger()
 	// 1. Define Flag
 	// Improved description for the help text

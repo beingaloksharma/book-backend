@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/beingaloksharma/book-backend/utils/logger"
 	"github.com/beingaloksharma/book-backend/utils/token"
 	"github.com/gin-gonic/gin"
 )
@@ -12,19 +13,22 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			logger.LogError(c, http.StatusUnauthorized, nil, "Authorization header required")
+			c.Abort()
 			return
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
+			logger.LogError(c, http.StatusUnauthorized, nil, "Invalid authorization header format")
+			c.Abort()
 			return
 		}
 
 		claims, err := token.ValidateToken(parts[1])
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			logger.LogError(c, http.StatusUnauthorized, err, "Invalid or expired token")
+			c.Abort()
 			return
 		}
 
@@ -38,7 +42,8 @@ func RoleMiddleware(requiredRole string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("role")
 		if !exists || role != requiredRole {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Forbidden: insufficient permissions"})
+			logger.LogError(c, http.StatusForbidden, nil, "Forbidden: insufficient permissions")
+			c.Abort()
 			return
 		}
 		c.Next()

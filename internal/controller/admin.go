@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/beingaloksharma/book-backend/internal/service"
+	"github.com/beingaloksharma/book-backend/utils/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +33,7 @@ func NewAdminController() *AdminController {
 func (c *AdminController) ListUsers(ctx *gin.Context) {
 	users, err := c.UserService.GetAllUsers()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		logger.LogError(ctx, http.StatusInternalServerError, err, "Failed to fetch users")
 		return
 	}
 	ctx.JSON(http.StatusOK, users)
@@ -51,7 +52,7 @@ func (c *AdminController) ListUsers(ctx *gin.Context) {
 func (c *AdminController) ListOrders(ctx *gin.Context) {
 	orders, err := c.OrderService.GetAllOrders()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		logger.LogError(ctx, http.StatusInternalServerError, err, "Failed to fetch orders")
 		return
 	}
 	ctx.JSON(http.StatusOK, orders)
