@@ -5,6 +5,8 @@ import (
 
 	"github.com/beingaloksharma/book-backend/internal/model"
 	"github.com/beingaloksharma/book-backend/internal/repository"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type OrderService struct {
@@ -28,34 +30,60 @@ func (s *OrderService) PlaceOrder(userID, addressID uint) error {
 		return errors.New("cart is empty")
 	}
 
-	totalAmount := 0.0
-	var orderItems []model.OrderItem
+	db := s.OrderRepo.DB
 
-	for _, item := range cart.Items {
-		price := item.Book.Price
-		totalAmount += price * float64(item.Quantity)
-		orderItems = append(orderItems, model.OrderItem{
-			BookID:   item.BookID,
-			Quantity: item.Quantity,
-			Price:    price,
-		})
-	}
+	// Start Transaction
+	return db.Transaction(func(tx *gorm.DB) error {
+		totalAmount := 0.0
+		var orderItems []model.OrderItem
 
-	order := &model.Order{
-		UserID:    userID,
-		AddressID: addressID,
-		Amount:    totalAmount,
-		Status:    model.OrderStatusPending,
-		Items:     orderItems,
-	}
+		for _, item := range cart.Items {
+			// Lock book row for update to prevent race conditions
+			var book model.Book
+			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&book, item.BookID).Error; err != nil {
+				return err
+			}
 
-	// Create Order
-	if err := s.OrderRepo.CreateOrder(order); err != nil {
-		return err
-	}
+			if book.Stock < item.Quantity {
+				return errors.New("insufficient stock for book: " + book.Title)
+			}
 
-	// Clear Cart
-	return s.CartRepo.ClearCart(cart.ID)
+			// Deduct Stock
+			book.Stock -= item.Quantity
+			if err := tx.Save(&book).Error; err != nil {
+				return err
+			}
+
+			price := book.Price
+			totalAmount += price * float64(item.Quantity)
+			orderItems = append(orderItems, model.OrderItem{
+				BookID:   item.BookID,
+				Quantity: item.Quantity,
+				Price:    price,
+			})
+		}
+
+		order := &model.Order{
+			UserID:    userID,
+			AddressID: addressID,
+			Amount:    totalAmount,
+			Status:    model.OrderStatusPending,
+			Items:     orderItems,
+		}
+
+		// Create Order
+		if err := tx.Create(order).Error; err != nil {
+			return err
+		}
+
+		// Clear Cart
+		// Note: We use the transaction handler 'tx' to ensure atomic operations
+		if err := tx.Where("cart_id = ?", cart.ID).Delete(&model.CartItem{}).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
 }
 
 func (s *OrderService) GetOrders(userID uint) ([]model.Order, error) {

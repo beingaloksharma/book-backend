@@ -3,12 +3,15 @@ package repository
 import (
 	"github.com/beingaloksharma/book-backend/internal/model"
 	"github.com/beingaloksharma/book-backend/utils/database"
+	"gorm.io/gorm"
 )
 
-type OrderRepository struct{}
+type OrderRepository struct {
+	DB *gorm.DB
+}
 
 func NewOrderRepository() *OrderRepository {
-	return &OrderRepository{}
+	return &OrderRepository{DB: database.GetInstance()}
 }
 
 func (r *OrderRepository) CreateOrder(order *model.Order) error {
