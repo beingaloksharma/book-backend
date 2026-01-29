@@ -4,15 +4,16 @@ import (
 	"net/http"
 
 	"github.com/beingaloksharma/book-backend/internal/service"
+	"github.com/beingaloksharma/book-backend/utils/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type CartController struct {
-	CartService *service.CartService
+	CartService service.CartServiceInterface
 }
 
-func NewCartController() *CartController {
-	return &CartController{CartService: service.NewCartService()}
+func NewCartController(cartService service.CartServiceInterface) *CartController {
+	return &CartController{CartService: cartService}
 }
 
 type AddToCartRequest struct {
@@ -36,7 +37,7 @@ func (c *CartController) AddToCart(ctx *gin.Context) {
 	userID, _ := ctx.Get("user_id")
 	var req AddToCartRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		logger.LogError(ctx, http.StatusBadRequest, err, "Invalid request body")
 		return
 	}
 
@@ -50,12 +51,12 @@ func (c *CartController) AddToCart(ctx *gin.Context) {
 		uid = v
 	default:
 		// Handle other cases or error
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
+		logger.LogError(ctx, http.StatusInternalServerError, nil, "Invalid user ID")
 		return
 	}
 
 	if err := c.CartService.AddToCart(uid, req.BookID, req.Quantity); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		logger.LogError(ctx, http.StatusInternalServerError, err, "Failed to add item to cart")
 		return
 	}
 
@@ -83,13 +84,13 @@ func (c *CartController) GetCart(ctx *gin.Context) {
 	case uint:
 		uid = v
 	default:
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
+		logger.LogError(ctx, http.StatusInternalServerError, nil, "Invalid user ID")
 		return
 	}
 
 	cart, err := c.CartService.GetCart(uid)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "Cart not found"})
+		logger.LogError(ctx, http.StatusNotFound, err, "Cart not found")
 		return
 	}
 

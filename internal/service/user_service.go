@@ -6,11 +6,11 @@ import (
 )
 
 type UserService struct {
-	Repo *repository.UserRepository
+	Repo repository.UserRepositoryInterface
 }
 
-func NewUserService() *UserService {
-	return &UserService{Repo: repository.NewUserRepository()}
+func NewUserService(repo repository.UserRepositoryInterface) *UserService {
+	return &UserService{Repo: repo}
 }
 
 func (s *UserService) GetProfile(userID uint) (*model.User, error) {

@@ -10,11 +10,11 @@ import (
 )
 
 type AuthService struct {
-	Repo *repository.UserRepository
+	Repo repository.UserRepositoryInterface
 }
 
-func NewAuthService() *AuthService {
-	return &AuthService{Repo: repository.NewUserRepository()}
+func NewAuthService(repo repository.UserRepositoryInterface) *AuthService {
+	return &AuthService{Repo: repo}
 }
 
 func (s *AuthService) Signup(name, email, password string, role model.Role) error {

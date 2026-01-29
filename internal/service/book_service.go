@@ -8,11 +8,11 @@ import (
 )
 
 type BookService struct {
-	Repo *repository.BookRepository
+	Repo repository.BookRepositoryInterface
 }
 
-func NewBookService() *BookService {
-	return &BookService{Repo: repository.NewBookRepository()}
+func NewBookService(repo repository.BookRepositoryInterface) *BookService {
+	return &BookService{Repo: repo}
 }
 
 func (s *BookService) CreateBook(title, author, description string, price float64, stock int) error {

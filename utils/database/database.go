@@ -46,7 +46,7 @@ func GetInstance() *gorm.DB {
 		// instance of db
 		dba = db
 		if err != nil {
-			logrus.Panic("Error connecting to the database at %s:%s/%s", host, port, dbname)
+			logrus.Panicf("Error connecting to the database at %s:%s/%s", host, port, dbname)
 		}
 		//print log when database connection is established
 		logrus.Infof("Successfully Established Connection to -- %s:%s/%s", host, port, dbname)

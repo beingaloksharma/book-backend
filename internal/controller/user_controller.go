@@ -4,15 +4,16 @@ import (
 	"net/http"
 
 	"github.com/beingaloksharma/book-backend/internal/service"
+	"github.com/beingaloksharma/book-backend/utils/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type UserController struct {
-	UserService *service.UserService
+	UserService service.UserServiceInterface
 }
 
-func NewUserController() *UserController {
-	return &UserController{UserService: service.NewUserService()}
+func NewUserController(userService service.UserServiceInterface) *UserController {
+	return &UserController{UserService: userService}
 }
 
 // GetProfile godoc
@@ -36,13 +37,13 @@ func (c *UserController) GetProfile(ctx *gin.Context) {
 	case uint:
 		uid = v
 	default:
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
+		logger.LogError(ctx, http.StatusInternalServerError, nil, "Invalid user ID")
 		return
 	}
 
 	user, err := c.UserService.GetProfile(uid)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		logger.LogError(ctx, http.StatusNotFound, err, "User not found")
 		return
 	}
 
@@ -73,7 +74,7 @@ func (c *UserController) AddAddress(ctx *gin.Context) {
 	userID, _ := ctx.Get("user_id")
 	var req AddressRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		logger.LogError(ctx, http.StatusBadRequest, err, "Invalid request body")
 		return
 	}
 
@@ -84,12 +85,12 @@ func (c *UserController) AddAddress(ctx *gin.Context) {
 	case uint:
 		uid = v
 	default:
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
+		logger.LogError(ctx, http.StatusInternalServerError, nil, "Invalid user ID")
 		return
 	}
 
 	if err := c.UserService.AddAddress(uid, req.Street, req.City, req.State, req.ZipCode, req.Country); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		logger.LogError(ctx, http.StatusInternalServerError, err, "Failed to add address")
 		return
 	}
 
@@ -116,13 +117,13 @@ func (c *UserController) GetAddresses(ctx *gin.Context) {
 	case uint:
 		uid = v
 	default:
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
+		logger.LogError(ctx, http.StatusInternalServerError, nil, "Invalid user ID")
 		return
 	}
 
 	addresses, err := c.UserService.GetAddresses(uid)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		logger.LogError(ctx, http.StatusInternalServerError, err, "Failed to fetch addresses")
 		return
 	}
 

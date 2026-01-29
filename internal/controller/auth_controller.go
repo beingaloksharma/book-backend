@@ -5,15 +5,16 @@ import (
 
 	"github.com/beingaloksharma/book-backend/internal/model"
 	"github.com/beingaloksharma/book-backend/internal/service"
+	"github.com/beingaloksharma/book-backend/utils/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type AuthController struct {
-	AuthService *service.AuthService
+	AuthService service.AuthServiceInterface
 }
 
-func NewAuthController() *AuthController {
-	return &AuthController{AuthService: service.NewAuthService()}
+func NewAuthController(authService service.AuthServiceInterface) *AuthController {
+	return &AuthController{AuthService: authService}
 }
 
 type SignupRequest struct {
@@ -41,12 +42,12 @@ type LoginRequest struct {
 func (c *AuthController) Signup(ctx *gin.Context) {
 	var req SignupRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		logger.LogError(ctx, http.StatusBadRequest, err, "Invalid request body")
 		return
 	}
 
 	if err := c.AuthService.Signup(req.Name, req.Email, req.Password, req.Role); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		logger.LogError(ctx, http.StatusBadRequest, err, "Signup failed")
 		return
 	}
 
@@ -67,13 +68,13 @@ func (c *AuthController) Signup(ctx *gin.Context) {
 func (c *AuthController) Login(ctx *gin.Context) {
 	var req LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		logger.LogError(ctx, http.StatusBadRequest, err, "Invalid request body")
 		return
 	}
 
 	token, err := c.AuthService.Login(req.Email, req.Password)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		logger.LogError(ctx, http.StatusUnauthorized, err, "Login failed")
 		return
 	}
 

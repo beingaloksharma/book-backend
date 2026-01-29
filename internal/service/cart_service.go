@@ -9,14 +9,14 @@ import (
 )
 
 type CartService struct {
-	CartRepo *repository.CartRepository
-	BookRepo *repository.BookRepository
+	CartRepo repository.CartRepositoryInterface
+	BookRepo repository.BookRepositoryInterface
 }
 
-func NewCartService() *CartService {
+func NewCartService(cartRepo repository.CartRepositoryInterface, bookRepo repository.BookRepositoryInterface) *CartService {
 	return &CartService{
-		CartRepo: repository.NewCartRepository(),
-		BookRepo: repository.NewBookRepository(),
+		CartRepo: cartRepo,
+		BookRepo: bookRepo,
 	}
 }
 

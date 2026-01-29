@@ -13,6 +13,8 @@ import (
 	"github.com/beingaloksharma/book-backend/internal/controller"
 	"github.com/beingaloksharma/book-backend/internal/middleware"
 	"github.com/beingaloksharma/book-backend/internal/model"
+	"github.com/beingaloksharma/book-backend/internal/repository"
+	"github.com/beingaloksharma/book-backend/internal/service"
 	"github.com/beingaloksharma/book-backend/utils/database"
 	"github.com/beingaloksharma/book-backend/utils/logger"
 	"github.com/gin-gonic/gin"
@@ -48,8 +50,26 @@ func main() {
 	r := gin.Default()
 	setupDatabase(r)
 
+	// Init Repositories
+	userRepo := repository.NewUserRepository()
+	bookRepo := repository.NewBookRepository()
+	cartRepo := repository.NewCartRepository()
+	orderRepo := repository.NewOrderRepository()
+
+	// Init Services
+	authService := service.NewAuthService(userRepo)
+	userService := service.NewUserService(userRepo)
+	bookService := service.NewBookService(bookRepo)
+	cartService := service.NewCartService(cartRepo, bookRepo)
+	orderService := service.NewOrderService(orderRepo, cartRepo, bookRepo)
+
 	// Init Controllers
-	authController := controller.NewAuthController()
+	authController := controller.NewAuthController(authService)
+	bookController := controller.NewBookController(bookService)
+	userController := controller.NewUserController(userService)
+	cartController := controller.NewCartController(cartService)
+	orderController := controller.NewOrderController(orderService)
+	adminController := controller.NewAdminController(userService, orderService)
 
 	// Routes
 	auth := r.Group("/auth")
@@ -61,15 +81,8 @@ func main() {
 	// Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Book Routes
-	bookController := controller.NewBookController()
 	api := r.Group("/api")
 	api.Use(middleware.AuthMiddleware())
-
-	// User, Cart, Order Controllers
-	userController := controller.NewUserController()
-	cartController := controller.NewCartController()
-	orderController := controller.NewOrderController()
 
 	// Public/User Book Routes
 	api.GET("/books", bookController.ListBooks)
@@ -89,7 +102,6 @@ func main() {
 	api.GET("/orders", orderController.GetOrders)
 
 	// Admin Book Routes
-	adminController := controller.NewAdminController()
 	admin := api.Group("/admin")
 	admin.Use(middleware.RoleMiddleware("ADMIN"))
 	{

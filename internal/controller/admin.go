@@ -9,14 +9,14 @@ import (
 )
 
 type AdminController struct {
-	UserService  *service.UserService
-	OrderService *service.OrderService
+	UserService  service.UserServiceInterface
+	OrderService service.OrderServiceInterface
 }
 
-func NewAdminController() *AdminController {
+func NewAdminController(userService service.UserServiceInterface, orderService service.OrderServiceInterface) *AdminController {
 	return &AdminController{
-		UserService:  service.NewUserService(),
-		OrderService: service.NewOrderService(),
+		UserService:  userService,
+		OrderService: orderService,
 	}
 }
 
