@@ -88,6 +88,7 @@ func main() {
 	api.GET("/orders", orderController.GetOrders)
 
 	// Admin Book Routes
+	adminController := controller.NewAdminController()
 	admin := api.Group("/admin")
 	admin.Use(middleware.RoleMiddleware("ADMIN"))
 	{
@@ -95,6 +96,8 @@ func main() {
 		admin.PUT("/books/:id", bookController.UpdateBook)
 		admin.DELETE("/books/:id", bookController.DeleteBook)
 		admin.GET("/profile", userController.GetProfile) // reusing user profile for admin
+		admin.GET("/users", adminController.ListUsers)
+		admin.GET("/orders", adminController.ListOrders)
 	}
 
 	port := viper.GetString("server.port")

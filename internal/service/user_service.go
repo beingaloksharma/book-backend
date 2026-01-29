@@ -32,3 +32,7 @@ func (s *UserService) AddAddress(userID uint, street, city, state, zip, country 
 func (s *UserService) GetAddresses(userID uint) ([]model.Address, error) {
 	return s.Repo.GetAddresses(userID)
 }
+
+func (s *UserService) GetAllUsers() ([]model.User, error) {
+	return s.Repo.FindAllUsers()
+}

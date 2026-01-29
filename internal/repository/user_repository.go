@@ -47,3 +47,12 @@ func (r *UserRepository) GetAddresses(userID uint) ([]model.Address, error) {
 	}
 	return addresses, nil
 }
+
+func (r *UserRepository) FindAllUsers() ([]model.User, error) {
+	db := database.GetInstance()
+	var users []model.User
+	if err := db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}

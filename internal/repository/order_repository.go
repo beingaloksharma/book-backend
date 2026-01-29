@@ -27,3 +27,12 @@ func (r *OrderRepository) FindByUserID(userID uint) ([]model.Order, error) {
 	}
 	return orders, nil
 }
+
+func (r *OrderRepository) FindAllOrders() ([]model.Order, error) {
+	db := database.GetInstance()
+	var orders []model.Order
+	if err := db.Preload("Items.Book").Find(&orders).Error; err != nil {
+		return nil, err
+	}
+	return orders, nil
+}

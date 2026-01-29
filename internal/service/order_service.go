@@ -89,3 +89,7 @@ func (s *OrderService) PlaceOrder(userID, addressID uint) error {
 func (s *OrderService) GetOrders(userID uint) ([]model.Order, error) {
 	return s.OrderRepo.FindByUserID(userID)
 }
+
+func (s *OrderService) GetAllOrders() ([]model.Order, error) {
+	return s.OrderRepo.FindAllOrders()
+}
