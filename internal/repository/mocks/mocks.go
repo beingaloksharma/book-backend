@@ -121,6 +121,9 @@ func (m *MockOrderRepository) CreateOrder(order *model.Order) error {
 }
 func (m *MockOrderRepository) FindByUserID(userID uint) ([]model.Order, error) {
 	args := m.Called(userID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).([]model.Order), args.Error(1)
 }
 func (m *MockOrderRepository) FindAllOrders() ([]model.Order, error) {

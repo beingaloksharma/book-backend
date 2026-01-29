@@ -32,6 +32,10 @@ run:
 test:
 	go test -v ./...
 
+## 🧪 Test: Run tests with coverage
+test-cover:
+	go test -cover ./...
+
 ## 📄 Docs: Generate Swagger documentation
 docs:
 	@echo "Generating Swagger documentation..."
